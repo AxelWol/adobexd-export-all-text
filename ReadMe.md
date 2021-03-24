@@ -75,3 +75,13 @@ Some special characters are encoded with this pattern {{ }}:
 '\uee88',   -->  '{{x1}}');
 '\uee80',   -->  '{{*}}');
 ```
+
+## Support and Contact
+
+You can reach me here:
+
+Email: axelwolters@gmail.com
+Blog: https://axelwolters.wordpress.com/
+Twitter: https://twitter.com/axelwol
+
+
