@@ -81,7 +81,9 @@ Some special characters are encoded with this pattern {{ }}:
 You can reach me here:
 
 Email: axelwolters@gmail.com
+
 Blog: https://axelwolters.wordpress.com/
+
 Twitter: https://twitter.com/axelwol
 
 
