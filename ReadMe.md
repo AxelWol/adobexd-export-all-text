@@ -87,3 +87,9 @@ Blog: https://axelwolters.wordpress.com/
 Twitter: https://twitter.com/axelwol
 
 
+## Disclaimer
+
+This is a private project.
+
+While I’m working at Microsoft, this work represents my personal view.
+Microsoft can not be made responsible for any content expressed here by myself.
