@@ -11,6 +11,12 @@ It can also import a modified CSV file back into Adobe XD.
 
 This is quite helpful for copy writing or translation work.
 
+## Installation
+Just grab the *.xdx file from the build directory and double click it.
+It will automatically installed into Adobe XD.
+
+_Hint_: The ZIP-file is protected with the password "adobexd".
+
 ## Format of CSV file
 ArtboardId;ArtboardName;TextId;Text
 
