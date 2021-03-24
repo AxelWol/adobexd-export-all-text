@@ -20,6 +20,7 @@ Only change the last cell "Text". The other cells are needed by the import funct
 ## Encoding
 Some special characters are encoded with this pattern {{ }}:
 
+```
 '\r\n'  -->  '{{cr}}{{lf}}');
 
 '\n\r'  -->  '{{cr}}{{lf}}');
@@ -69,3 +70,4 @@ Some special characters are encoded with this pattern {{ }}:
 '\x0e',   -->  '{{so}}');
 
 '\x0f',   -->  '{{si}}');
+```
