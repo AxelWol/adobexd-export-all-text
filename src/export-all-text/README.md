@@ -2,6 +2,9 @@
 
 Exports all text resources from an Adobe XD file to a CSV file.
 
+## Build
+Version 1.3.2 (changed 2021/03/29).
+
 ## Usage
 
 1. Run "Plugins > Export all the text resources > Export all text resources".

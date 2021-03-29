@@ -1,4 +1,4 @@
-const { Artboard, Rectangle, Ellipse, Text, Color, Group, selection } = require("scenegraph");
+const { Artboard, Text, Group, RepeatGrid } = require("scenegraph");
 const fs = require("uxp").storage.localFileSystem;
 
 let panel;
@@ -54,11 +54,11 @@ function create() {
         
         editDocument({ editLabel: "Import all text resources" }, 
             async function (selection, root) {
-            console.log("----Start Action Import");
+            console.log("--- Start Action Import");
 
             await readFromFile(fileName, root);
 
-            console.log("----End Action");
+            console.log("--- End Action");
             });
         }        
 
@@ -69,7 +69,7 @@ function create() {
 
         editDocument({ editLabel: "Export all text resources" }, 
             async function (selection, root) {
-            console.log("----Start Action Export");
+            console.log("--- Start Action Export");
 
             // File buffer
             let fileContent = [];
@@ -83,7 +83,7 @@ function create() {
                 if (node instanceof Artboard) {
                     // Expand artboard
                     let artboard = node;
-                    // console.log("Found artboard: " + artboard.name);
+                    console.log("Found artboard: " + artboard.name);
                     artboard.children.forEach(child => {
                         extractText(fileContent, artboard.name, artboard.guid, child);
                     });
@@ -92,13 +92,14 @@ function create() {
                 }
                 else {
                     // No artboard, no Text
+                    console.log("(EX) Ignoring: " + node.name + " :: " + node.className);
                 }
             });
             
             let allContent = fileContent.join('');
             console.log("Collected: \r\n" + allContent);
             await writeToFile(fileName, allContent);
-            console.log("----End Action");
+            console.log("--- End Action");
         });
     }
 
@@ -163,7 +164,7 @@ async function readFromFile(fileName, root) {
             if (node instanceof Artboard) {
                 // Expand artboard
                 let artboard = node;
-                // console.log("Found artboard: " + artboard.name);
+                console.log("Found artboard: " + artboard.name);
                 artboard.children.forEach(child => {
                     replaceText(grid, artboard.name, artboard.guid, child);
                 });
@@ -226,20 +227,25 @@ function parseCsv(data, fieldSep, newLine) {
 
 function replaceText(grid, artboardName, artboardId, node)
 {
-    // console.log("Checking node type");
+    console.log("Checking node type");
     if (node === undefined) {
         return;
     } else if (node instanceof Text) {
         let text = node.text;
-        // console.log("Found Text: " + text + " with ID: " + node.guid);
+        console.log("Found Text: " + text + " with ID: " + node.guid);
         processEntry(grid, artboardId, artboardName, node);
     } else if (node instanceof Group) {
-        // console.log("Expanding group" + node.name + ":");
+        console.log("Expanding Group: " + node.name + ":");
+        node.children.forEach(item => {
+            replaceText(grid, artboardName, artboardId, item);
+        });
+    } else if (node instanceof RepeatGrid) {
+        console.log("Expanding RepeatGrid: " + node.name + ":");
         node.children.forEach(item => {
             replaceText(grid, artboardName, artboardId, item);
         });
     } else {
-        //console.log("Ignoring: " + node.name);
+        console.log("(RP) Ignoring: " + node.name + " :: " + node.className);
     }
 }
 
@@ -249,15 +255,20 @@ function extractText(ct, artboardName, artboardId, node)
         return;
     } else if (node instanceof Text) {
         let text = node.text;
-        // console.log("Found Text: " + text + " with ID: " + node.guid);
+        console.log("## Found Text: '" + text + "' with ID: {" + node.guid + "}");
         writeLine(ct, artboardId, artboardName, node.guid, text);
     } else if (node instanceof Group) {
-        // console.log("Expanding group" + node.name + ":");
+        console.log("## Expanding Group: " + node.name + ":");
         node.children.forEach(item => {
             extractText(ct, artboardName, artboardId, item);
         });
-    } else {
-        // console.log("Ignoring: " + node.name);
+    } else if (node instanceof RepeatGrid) {
+        console.log("## Expanding RepeatGrid: " + node.name + ":");
+        node.children.forEach(item => {
+            extractText(ct, artboardName, artboardId, item);
+        });
+    }else {
+        console.log("(ET) Ignoring: " + node.name + "\r\n");
     }
 }
 
@@ -278,76 +289,34 @@ function processEntry(grid, artboardId, artboardName, node) {
     }
 }
 
-function replaceTokens(inp) {
-    let out = inp.replace('{{semicolon}}', ';');
-    out = out.replace('{{cr}}{{lf}}', '\r\n');
-    out = out.replace('{{cr}}{{lf}}', '\n\r');
-    out = out.replace('{{cr}}', '\r');
-    out = out.replace('{{lf}}', '\n');
-    out = out.replace('{{tab}}', '\t');
-    out = out.replace('{{x1}}', '\uee88');
-    out = out.replace('{{*}}', '\uee80');
-    out = out.replace('{{_}}', '\x91');
-    out = out.replace('{{x2}}', '\x87');
-    out = out.replace('{{nul}}', '\x00');
-    out = out.replace('{{soh}}', '\x01');
-    out = out.replace('{{stx}}', '\x02');
-    out = out.replace('{{etx}}', '\x03');
-    out = out.replace('{{eot}}', '\x04');
-    out = out.replace('{{enq}}', '\x05');
-    out = out.replace('{{ack}}', '\x06');
-    out = out.replace('{{bel}}', '\x07');
-    out = out.replace('{{bs}}', '\x08');
-    out = out.replace('{{tab}}', '\x09');
-    out = out.replace('{{lf}}', '\x0a');
-    out = out.replace('{{vt}}', '\x0b');
-    out = out.replace('{{ff}}', '\x0c');
-    out = out.replace('{{cr}}', '\x0d');
-    out = out.replace('{{so}}', '\x0e');
-    out = out.replace('{{si}}', '\x0f');
-    return out;
+function replaceTokens(str) {
+    let regexp = /(\{\{\d*\}\})/g;
+    let result = str.replace(regexp, match =>
+        {
+                let m = match.replace('{{', '');
+                m = m.replace('}}', '');
+                let code = String.fromCharCode(m);
+                console.log("{{" + m + "}}");
+                return code;
+        });
+    
+    return result;
 }
 
-// s -> s
-function strip(s) {
-        return s.split('').filter(function (x) {
-            var n = x.charCodeAt(0);
- 
-            return 31 < n;
-        }).join('');
-    }
-
 function writeLine(ct, ai, an, ti, t) {
-        // create CSV entry
-        let filteredText = t.replace(';', '{{semicolon}}');
-        filteredText = filteredText.replace('\r\n', '{{cr}}{{lf}}');
-        filteredText = filteredText.replace('\n\r', '{{cr}}{{lf}}');
-        filteredText = filteredText.replace('\r', '{{cr}}');
-        filteredText = filteredText.replace('\n', '{{lf}}');
-        filteredText = filteredText.replace('\t', '{{tab}}');
-        filteredText = filteredText.replace('\uee88', '{{x1}}');
-        filteredText = filteredText.replace('\uee80', '{{*}}');
-        filteredText = filteredText.replace('\x91', '{{_}}');
-        filteredText = filteredText.replace('\x87', '{{x2}}');
-        filteredText = filteredText.replace('\x00', '{{nul}}');
-        filteredText = filteredText.replace('\x01', '{{soh}}');
-        filteredText = filteredText.replace('\x02', '{{stx}}');
-        filteredText = filteredText.replace('\x03', '{{etx}}');
-        filteredText = filteredText.replace('\x04', '{{eot}}');
-        filteredText = filteredText.replace('\x05', '{{enq}}');
-        filteredText = filteredText.replace('\x06', '{{ack}}');
-        filteredText = filteredText.replace('\x07', '{{bel}}');
-        filteredText = filteredText.replace('\x08', '{{bs}}');
-        filteredText = filteredText.replace('\x09', '{{tab}}');
-        filteredText = filteredText.replace('\x0a', '{{lf}}');
-        filteredText = filteredText.replace('\x0b', '{{vt}}');
-        filteredText = filteredText.replace('\x0c', '{{ff}}');
-        filteredText = filteredText.replace('\x0d', '{{cr}}');
-        filteredText = filteredText.replace('\x0e', '{{so}}');
-        filteredText = filteredText.replace('\x0f', '{{si}}');
-        filteredText = strip(filteredText);
+    // create CSV entry
+    let filteredText = t.split('')
+        .map(function(e){
+            var n = e.charCodeAt(0);
+            if (n <= 31 || n >= 256) {
+                return '{{' + n + '}}';
+            }
+            else {
+                return e;
+            }
+        }).join('');
 
-        let line = ai + ";" + an + ";" + ti + ";" + filteredText;
-        // console.log(line);
-        ct.push(line + "\r\n");
+    let line = ai + ";" + an + ";" + ti + ";" + filteredText;
+    console.log("## Written: '" + filteredText + "'\r\n");
+    ct.push(line + "\r\n");
 }
