@@ -295,9 +295,13 @@ function replaceTokens(str) {
         {
                 let m = match.replace('{{', '');
                 m = m.replace('}}', '');
-                let code = String.fromCharCode(m);
-                console.log("{{" + m + "}}");
-                return code;
+                let c = String.fromCharCode(m);
+                if (m >= 0 && m <= 0xFFFF) {
+                console.log("xx {{" + m + "}}");
+                return c;
+                } else {
+                    return ' ';
+                }
         });
     
     return result;
