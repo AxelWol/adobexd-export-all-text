@@ -2,6 +2,9 @@
 
 Import/Export all text resources of an Adobe XD file
 
+## Build
+Version 1.3.2 (changed 2021/03/29).
+
 ## Description
 
 This is a simple export/import plugin for Adobe XD.
