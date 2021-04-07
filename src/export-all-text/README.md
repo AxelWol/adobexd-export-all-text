@@ -3,7 +3,7 @@
 Exports all text resources from an Adobe XD file to a CSV file.
 
 ## Build
-Version 1.3.2 (changed 2021/03/29).
+Version 1.3.9 (changed 2021/04/07). Bug fix for file name input. Changed filter from number to text.
 
 ## Usage
 

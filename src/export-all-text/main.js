@@ -31,7 +31,7 @@ function create() {
             <div class="row break">
                 <label class="row">
                     <span>File</span>&nbsp;
-                    <input type="number" uxp-quiet="true" id="txtFilename" value="" placeholder="text-export.csv" />
+                    <input type="text" uxp-quiet="true" id="txtFilename" value="" placeholder="text-export.csv" />
                 </label>
             </div>
             <footer>
@@ -50,7 +50,7 @@ function create() {
     function importAllText() {
         console.log("Init");
         const { editDocument } = require("application");
-        const fileName = Number(document.querySelector("#txtFilename").value);
+        const fileName = document.querySelector("#txtFilename").value;
         
         editDocument({ editLabel: "Import all text resources" }, 
             async function (selection, root) {
@@ -65,7 +65,7 @@ function create() {
     function exportAllText() {
         console.log("Init");
         const { editDocument } = require("application");
-        const fileName = Number(document.querySelector("#txtFilename").value);
+        const fileName = document.querySelector("#txtFilename").value;
 
         editDocument({ editLabel: "Export all text resources" }, 
             async function (selection, root) {

@@ -3,7 +3,7 @@
 Import/Export all text resources of an Adobe XD file
 
 ## Build
-Version 1.3.2 (changed 2021/03/29).
+Version 1.3.9 (changed 2021/04/07). Bug fix for file name input. Changed filter from number to text.
 
 ## Description
 
